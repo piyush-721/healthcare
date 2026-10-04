@@ -1,0 +1,43 @@
+[project]
+name = "healthos-backend"
+version = "1.0.0"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["test_*.py"]
+testpaths = ["tests"]
+addopts = "-q --strict-markers --no-migrations --reuse-db"
+filterwarnings = ["ignore::DeprecationWarning:celery.*"]
+
+[tool.coverage.run]
+source = ["apps"]
+omit = ["*/migrations/*"]
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+extend-exclude = "migrations"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["*/migrations/*"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "DJ", "S", "BLE", "C4", "SIM", "RUF"]
+ignore = [
+  "S101",   # assert is fine in tests
+  "RUF012", # DRF class attributes are idiomatic mutable lists
+  "DJ001",  # blank CharFields without null are intentional
+  "SIM108",
+  "RUF001", "RUF002", "RUF003",  # typographic characters in user-facing copy
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S105", "S106", "S311"]
+"config/settings/*" = ["F405", "F403"]
+# Enum labels such as PASSWORD_RESET / header names are not secrets.
+"apps/audit/models.py" = ["S105"]
+"apps/accounts/models.py" = ["S105"]
+"apps/sharing/views.py" = ["S105"]
