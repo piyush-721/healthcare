@@ -96,6 +96,8 @@ DATABASES = {
         conn_health_checks=True,
     )
 }
+# Required behind transaction-mode poolers (PgBouncer, Neon's pooled endpoint).
+DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = env_bool("DATABASE_POOLED", False)
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "accounts.User"
@@ -120,20 +122,32 @@ TIME_ZONE = "UTC"
 USE_I18N = False
 USE_TZ = True
 
+# The API serves no static files (Swagger UI loads its assets from a CDN).
 STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # ---------------------------------------------------------------------------
 # Cache / Redis
 # ---------------------------------------------------------------------------
 REDIS_URL = env("REDIS_URL", "redis://localhost:6380/0")
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": REDIS_URL,
-        "KEY_PREFIX": "healthos",
+# The cache backs rate limiting, so it must be shared by every server instance.
+# "redis" (default) or "database" (a Postgres table; run `manage.py createcachetable`).
+CACHE_BACKEND = env("CACHE_BACKEND", "redis")
+if CACHE_BACKEND == "database":
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+            "LOCATION": "healthos_cache",
+            "KEY_PREFIX": "healthos",
+        }
     }
-}
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": REDIS_URL,
+            "KEY_PREFIX": "healthos",
+        }
+    }
 
 # ---------------------------------------------------------------------------
 # Django REST Framework
@@ -170,6 +184,9 @@ REST_FRAMEWORK = {
         "uploads": env("THROTTLE_UPLOADS", "30/min"),
     },
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
+    # Number of trusted reverse proxies in front of Django. 0 = use REMOTE_ADDR only,
+    # so clients can't spoof X-Forwarded-For to dodge rate limits.
+    "NUM_PROXIES": env_int("NUM_PROXIES", 0),
     "UNAUTHENTICATED_USER": None,
 }
 
@@ -251,6 +268,7 @@ EMAIL_PORT = env_int("EMAIL_PORT", 1025)
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", False)
+EMAIL_USE_SSL = env_bool("EMAIL_USE_SSL", False)
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", "HealthOS <no-reply@healthos.local>")
 
 # ---------------------------------------------------------------------------
@@ -264,6 +282,9 @@ CELERY_TASK_ACKS_LATE = True
 CELERY_TASK_TIME_LIMIT = 120
 CELERY_WORKER_HIJACK_ROOT_LOGGER = False
 CELERY_TIMEZONE = "UTC"
+# Shared secret for the scheduled-job endpoint (/api/v1/internal/cron/<job>/), used when
+# a platform scheduler such as Vercel Cron replaces Celery beat. Empty disables the endpoint.
+CRON_SECRET = env("CRON_SECRET", "")
 CELERY_BEAT_SCHEDULE = {
     "dispatch-medication-reminders": {
         "task": "apps.notifications.tasks.dispatch_medication_reminders",

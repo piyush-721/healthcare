@@ -1,0 +1,27 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "web": {
+      "root": "frontend/",
+      "framework": "nextjs"
+    },
+    "api": {
+      "root": "backend/",
+      "framework": "django",
+      "entrypoint": "pyproject.toml",
+      "functions": {
+        "config/wsgi.py": { "maxDuration": 60 }
+      }
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": { "service": "api" } },
+    { "source": "/(.*)", "destination": { "service": "web" } }
+  ],
+  "crons": [
+    { "path": "/api/v1/internal/cron/medication-reminders/", "schedule": "*/5 * * * *" },
+    { "path": "/api/v1/internal/cron/appointment-reminders/", "schedule": "*/5 * * * *" },
+    { "path": "/api/v1/internal/cron/share-expiry/", "schedule": "*/15 * * * *" },
+    { "path": "/api/v1/internal/cron/purge-sessions/", "schedule": "0 3 * * *" }
+  ]
+}

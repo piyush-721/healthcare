@@ -19,7 +19,10 @@ logger = logging.getLogger(__name__)
 REMINDER_LOOKBACK = timedelta(minutes=15)
 
 
-@shared_task(bind=True, autoretry_for=(OSError,), retry_backoff=True, max_retries=5)
+# Backoff is capped low: on Vercel Queues a pending retry keeps the function invocation open.
+@shared_task(
+    bind=True, autoretry_for=(OSError,), retry_backoff=True, retry_backoff_max=30, max_retries=5
+)
 def send_email(self, *, to: str, subject: str, body: str) -> None:  # type: ignore[no-untyped-def]
     send_mail(subject=subject, message=body, from_email=None, recipient_list=[to])
     logger.info("email sent", extra={"task_id": self.request.id})

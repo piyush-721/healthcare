@@ -13,7 +13,7 @@ from .models import MedicalDocument
 logger = logging.getLogger(__name__)
 
 
-@shared_task(bind=True, max_retries=3, default_retry_delay=30)
+@shared_task(bind=True, max_retries=3, default_retry_delay=10)
 def scan_document(self, document_id: str) -> str:  # type: ignore[no-untyped-def]
     document = MedicalDocument.objects.filter(id=document_id).first()
     if document is None or document.scan_status != MedicalDocument.ScanStatus.PENDING:

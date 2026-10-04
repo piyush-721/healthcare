@@ -1,10 +1,12 @@
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
+from apps.common.cron import CronJobView
 from apps.common.views import HealthView
 
 api_v1 = [
     path("health/", HealthView.as_view(), name="health"),
+    path("internal/cron/<slug:job>/", CronJobView.as_view(), name="cron-job"),
     path("auth/", include("apps.accounts.urls")),
     path("", include("apps.profiles.urls")),
     path("", include("apps.family.urls")),

@@ -21,6 +21,7 @@ results, treatment plans and a unified timeline. You decide exactly who else can
 - [Getting started](#getting-started)
   - [Option A — Docker (everything)](#option-a--docker-everything)
   - [Option B — Local development](#option-b--local-development)
+  - [Option C — Vercel](#option-c--vercel)
 - [Running tests](#running-tests)
 - [API documentation](#api-documentation)
 - [Security notes](#security-notes)
@@ -126,6 +127,14 @@ Without a Celery worker, set `CELERY_TASK_ALWAYS_EAGER=true` so tasks run inline
 | `demo@healthos.local` | Patient with medications, appointments, labs, a dependent child and a caregiver |
 | `caregiver@healthos.local` | Caregiver for the demo patient (manage medications/appointments, view labs) |
 | `admin@healthos.local` | Platform admin. Note that the admin cannot open anyone's health data |
+
+### Option C — Vercel
+
+The whole stack runs on Vercel as one project: Next.js and Django as
+[Vercel Services](https://vercel.com/docs/services), Celery through Vercel Queues, scheduled
+jobs through Vercel Cron, documents in private Vercel Blob storage, and Postgres from Neon.
+Follow the step-by-step guide in [docs/deployment/vercel.md](docs/deployment/vercel.md),
+including the plan limits for cron and the 4 MB upload limit.
 
 **Database and migrations**
 

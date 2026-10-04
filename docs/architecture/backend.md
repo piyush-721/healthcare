@@ -78,3 +78,4 @@ Tasks are enqueued with `transaction.on_commit`, so a rolled-back request never 
 | `dev` | Debug on, plain logs, non-secure cookies for http://localhost |
 | `test` | MD5 hashing (fast), eager Celery, locmem email/cache, temp storage, relaxed throttles |
 | `prod` | Debug off, HSTS, SSL redirect, secure cookies, proxy SSL header |
+| `vercel` | `prod` + Vercel Blob storage, Vercel Queues broker, cron endpoint, pooled Postgres, 4 MB uploads ([guide](../deployment/vercel.md)) |

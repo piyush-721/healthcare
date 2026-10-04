@@ -32,3 +32,5 @@ next-env.d.ts
 .idea/
 *.log
 celerybeat-schedule*
+.vercel
+.env*.local

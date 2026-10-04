@@ -24,7 +24,8 @@ export const DOCUMENT_TYPES = [
 export type RecordType = (typeof RECORD_TYPES)[number];
 export type DocumentType = (typeof DOCUMENT_TYPES)[number];
 
-export const MAX_UPLOAD_MB = 15;
+// Must match the backend's MAX_UPLOAD_SIZE_MB (4 MB on Vercel; see next.config.ts).
+export const MAX_UPLOAD_MB = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB) || 15;
 export const MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024;
 export const ACCEPTED_EXTENSIONS = [".pdf", ".png", ".jpg", ".jpeg", ".webp"] as const;
 export const ACCEPTED_MIME_TYPES = [

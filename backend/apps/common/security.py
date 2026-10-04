@@ -20,7 +20,16 @@ def hash_token(token: str) -> str:
 
 
 def client_ip(request: HttpRequest) -> str | None:
-    # REMOTE_ADDR is authoritative; behind a trusted proxy configure it to set REMOTE_ADDR.
+    """Client IP, honouring X-Forwarded-For only for the configured number of trusted proxies.
+
+    Mirrors DRF's throttle identification so audit logs and rate limits agree.
+    """
+    num_proxies = settings.REST_FRAMEWORK.get("NUM_PROXIES") or 0
+    forwarded = request.META.get("HTTP_X_FORWARDED_FOR", "")
+    if num_proxies > 0 and forwarded:
+        addresses = [part.strip() for part in forwarded.split(",") if part.strip()]
+        if addresses:
+            return addresses[-min(num_proxies, len(addresses))]
     return request.META.get("REMOTE_ADDR")
 
 

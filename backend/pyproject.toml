@@ -2,6 +2,41 @@
 name = "healthos-backend"
 version = "1.0.0"
 requires-python = ">=3.12"
+# Runtime dependencies. Vercel installs from here; requirements/base.txt mirrors this
+# list for Docker/pip (kept in sync by tests/test_vercel.py).
+dependencies = [
+  "Django>=5.2,<5.3",
+  "djangorestframework>=3.16,<4",
+  "drf-spectacular>=0.28,<1",
+  "django-filter>=24.0",
+  "django-cors-headers>=4.4,<5",
+  "dj-database-url>=2.2,<4",
+  "psycopg[binary]>=3.2,<4",
+  "celery>=5.4,<6",
+  "redis>=5.0",
+  "PyJWT>=2.9,<3",
+  "gunicorn>=23.0",
+  "vercel>=0.11,<1",
+]
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["apps*", "config*"]
+
+# --- Vercel -------------------------------------------------------------------
+# The Django app runs as a Vercel Function; Celery tasks run as a private,
+# queue-triggered function fed by Vercel Queues (see config/settings/vercel.py).
+[tool.vercel]
+entrypoint = "config.wsgi:application"
+
+[[tool.vercel.subscribers]]
+entrypoint = "config.celery:app"
+
+[tool.vercel.scripts]
+build = "python vercel_build.py"
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings.test"
