@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+/*
+ * HealthOS design tokens. Colours are chosen for WCAG AA contrast on white:
+ * brand-700 (#0f6b66) on white = 6.2:1, slate-600 body text = 7.5:1.
+ */
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --color-brand-50: #effaf8;
+  --color-brand-100: #d5f2ed;
+  --color-brand-200: #aee4dc;
+  --color-brand-300: #7dcfc4;
+  --color-brand-400: #4fb3a8;
+  --color-brand-500: #2f978d;
+  --color-brand-600: #217a73;
+  --color-brand-700: #0f6b66;
+  --color-brand-800: #0f5551;
+  --color-brand-900: #0f4643;
+
+  --color-canvas: #f6f8fa;
+  --radius-card: 0.75rem;
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 1px 3px rgb(15 23 42 / 0.06);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-canvas text-slate-900;
+  }
+
+  :focus-visible {
+    @apply outline-brand-600 outline-2 outline-offset-2;
+  }
+
+  ::selection {
+    @apply bg-brand-100;
+  }
+}
+
+@layer components {
+  .sr-only-focusable:not(:focus) {
+    @apply sr-only;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
